@@ -78,8 +78,8 @@ export function CategoryPage({ search }: { search?: boolean }) {
       {(list.length > 0 || !search) && (
         <div className="mt-4 mb-2">
           <label className="flex items-center gap-2 text-sm">
-            <span className="text-muted">ترتيب حسب</span>
-            <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="field w-auto py-2">
+            
+            <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="cursor-pointer rounded border border-line bg-card px-1 py-0 text-[11px] font-medium text-ink focus:outline-none">
               {Object.entries(SORTS).map(([key, { label }]) => (
                 <option key={key} value={key}>
                   {label}
