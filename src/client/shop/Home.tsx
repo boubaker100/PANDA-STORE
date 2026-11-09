@@ -24,6 +24,28 @@ export function Home() {
       {banners.length > 0 && <BannerSlider banners={banners} />}
       <InstallBanner />
 
+      {categories.length > 0 && (
+        <section className="mt-8">
+          <h2 className="mb-4 px-4 text-xl font-bold md:text-2xl">تسوّق حسب القسم</h2>
+          <ul className="no-scrollbar flex gap-4 overflow-x-auto px-4 md:gap-8">
+            {categories.map((cat) => (
+              <li key={cat.id} className="shrink-0">
+                <Link to={`/c/${cat.id}`} className="group flex w-20 flex-col items-center gap-2 text-center md:w-28">
+                  <span className="block size-20 overflow-hidden rounded-full border border-line bg-card md:size-28">
+                    {cat.imageKey ? (
+                      <img src={imageUrl(cat.imageKey)} alt="" className="size-full object-cover transition group-hover:scale-105" />
+                    ) : (
+                      <span className="grid size-full place-items-center bg-brand/8 text-2xl font-bold text-brand">{cat.name.charAt(0)}</span>
+                    )}
+                  </span>
+                  <span className="text-sm font-medium leading-tight">{cat.name}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <Features />
 
       <ProductRail title="عروض وخصومات" products={onSale} />

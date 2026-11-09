@@ -76,10 +76,11 @@ export function CategoryPage({ search }: { search?: boolean }) {
       )}
 
       {(list.length > 0 || !search) && (
-        <div className="mt-4 mb-2">
+        <div className="my-5 flex items-center justify-between gap-3">
+          <p className="text-sm text-muted">{list.length ? count(list.length, PRODUCTS_WORDS) : ''}</p>
           <label className="flex items-center gap-2 text-sm">
-            
-            <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="cursor-pointer rounded border border-line bg-card px-1 py-0 text-[11px] font-medium text-ink focus:outline-none">
+            <span className="text-muted">ترتيب حسب</span>
+            <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="field w-auto py-2">
               {Object.entries(SORTS).map(([key, { label }]) => (
                 <option key={key} value={key}>
                   {label}
@@ -88,10 +89,6 @@ export function CategoryPage({ search }: { search?: boolean }) {
             </select>
           </label>
         </div>
-      )}
-
-      {list.length > 0 && (
-        <p className="mb-3 text-sm text-muted">{count(list.length, PRODUCTS_WORDS)}</p>
       )}
 
       {list.length > 0 ? (
