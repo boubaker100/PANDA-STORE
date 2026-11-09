@@ -48,29 +48,35 @@ export function ProductPage() {
         <span className="text-ink font-medium truncate max-w-[180px] sm:max-w-xs">{product.name}</span>
       </nav>
 
-      {/* Hero Product Presentation */}
-      <div className="mt-4 grid gap-8 lg:grid-cols-12 min-w-0">
-        {/* Gallery column - vertical stack preserving natural aspect ratio */}
-        <section className="min-w-0 lg:col-span-6" aria-label="معرض صور المنتج">
-          <div className="space-y-4">
-            {images.map((key, i) => (
-              <div key={key ?? i} className="relative overflow-hidden rounded-2xl border border-line bg-card shadow-sm">
-                <ProductImage
-                  name={product.name}
-                  image={key}
-                  className="w-full h-auto block"
-                />
-                {i === 0 && off > 0 && (
-                  <span className="absolute start-3 top-3 rounded-lg bg-sale px-3 py-1 text-sm font-bold text-white shadow-sm">
-                    خصم {off}%
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
+      {/* Main content — flex column with order switching (mobile vs desktop) */}
+      <div className="mt-4 flex flex-col gap-6 min-w-0">
 
-          {/* Highlights & Guarantees */}
-          <div className="mt-6 rounded-2xl border border-line bg-card p-4 space-y-3">
+        {/* 1) Title + Price + Availability (mobile: after images / desktop: first) */}
+        <div className="order-2 lg:order-1 min-w-0">
+          <h1 className="text-2xl font-bold leading-snug sm:text-3xl text-ink break-words">{product.name}</h1>
+          <div className="mt-3 flex flex-wrap items-baseline gap-3">
+            <span className="text-3xl font-extrabold text-brand">{money(product.price, store.currency)}</span>
+            {off > 0 && (
+              <>
+                <s className="text-lg text-muted">{money(product.oldPrice!, store.currency)}</s>
+                <span className="rounded-md bg-sale/10 px-2 py-0.5 text-sm font-bold text-sale">
+                  وفّر {money(product.oldPrice! - product.price, store.currency)}
+                </span>
+              </>
+            )}
+          </div>
+          <p className={`mt-2 flex items-center gap-1.5 text-sm font-semibold ${product.available ? 'text-emerald-700' : 'text-sale'}`}>
+            {product.available ? (
+              <>
+                <CheckIcon width={18} height={18} /> متوفر في المخزون وجاهز للشحن الفوري
+              </>
+            ) : (
+              'نفدت الكمية مؤقتاً'
+            )}
+          </p>
+
+          {/* Trust badges */}
+          <div className="mt-4 rounded-2xl border border-line bg-card p-4 space-y-3">
             <div className="flex items-center gap-3 text-sm">
               <span className="text-brand shrink-0"><TruckIcon /></span>
               <span><strong>توصيل لـ 69 ولاية:</strong> للمنزل أو الاستلام من المكتب، والدفع عند الاستلام بعد المعاينة.</span>
@@ -80,106 +86,106 @@ export function ProductPage() {
               <span><strong>ضمان المعاينة:</strong> افتح طردك وتأكد من جودة المنتج قبل تسليم المبلغ للموزع.</span>
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* Order Form & Main Info column */}
-        <section className="min-w-0 lg:col-span-6" aria-label="طلب المنتج">
-          <div className="mb-4">
-            <h1 className="text-2xl font-bold leading-snug sm:text-3xl text-ink break-words">{product.name}</h1>
-            <div className="mt-3 flex flex-wrap items-baseline gap-3">
-              <span className="text-3xl font-extrabold text-brand">{money(product.price, store.currency)}</span>
-              {off > 0 && (
-                <>
-                  <s className="text-lg text-muted">{money(product.oldPrice!, store.currency)}</s>
-                  <span className="rounded-md bg-sale/10 px-2 py-0.5 text-sm font-bold text-sale">
-                    وفّر {money(product.oldPrice! - product.price, store.currency)}
+        {/* 2) Images grid (mobile: first / desktop: after title) */}
+        <div className="order-1 lg:order-2 min-w-0" aria-label="معرض صور المنتج">
+          <div className="columns-2 sm:columns-3 gap-2 sm:gap-3 [column-fill:_balance]">
+            {images.map((key, i) => (
+              <div key={key ?? i} className="relative mb-2 sm:mb-3 break-inside-avoid overflow-hidden rounded-xl border border-line bg-card shadow-sm">
+                <ProductImage
+                  name={product.name}
+                  image={key}
+                  className="w-full h-auto block"
+                />
+                {i === 0 && off > 0 && (
+                  <span className="absolute start-2 top-2 rounded-md bg-sale px-2 py-0.5 text-xs font-bold text-white shadow-sm">
+                    خصم {off}%
                   </span>
-                </>
-              )}
-            </div>
-
-            <p className={`mt-2 flex items-center gap-1.5 text-sm font-semibold ${product.available ? 'text-emerald-700' : 'text-sale'}`}>
-              {product.available ? (
-                <>
-                  <CheckIcon width={18} height={18} /> متوفر في المخزون وجاهز للشحن الفوري
-                </>
-              ) : (
-                'نفدت الكمية مؤقتاً'
-              )}
-            </p>
+                )}
+              </div>
+            ))}
           </div>
+        </div>
 
-          {/* Embedded Dynamic Algerian Order Form */}
-          <div id="order-form" ref={orderFormRef} className="min-w-0">
-            <AlgeriaOrderForm product={product} />
-          </div>
-        </section>
-      </div>
+        {/* 3) Long Description */}
+        {product.description && (
+          <section className="order-3 min-w-0 rounded-2xl border border-line bg-card p-4 sm:p-6 shadow-sm">
+            <h2 className="text-xl font-bold mb-3 text-ink">تفاصيل المنتج</h2>
+            <p className="whitespace-pre-line leading-relaxed text-ink/85 break-words">{product.description}</p>
+          </section>
+        )}
 
-      {/* Video section if present */}
-      {product.videoUrl && (
-        <section className="min-w-0 mt-12 rounded-2xl border border-line bg-card p-4 sm:p-6 shadow-sm">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <span>🎬</span>
-            <span>فيديو توضيحي للمنتج وتجربة الاستخدام</span>
-          </h2>
-          <div className="max-w-3xl mx-auto min-w-0">
-            <VideoPlayer url={product.videoUrl} title={product.name} />
-          </div>
-        </section>
-      )}
+        {/* 4) Features + Specs + Video */}
+        <div className="order-4 space-y-6 min-w-0">
+          {sections.filter((s) => s.enabled && s.type === 'features').map((sec) => {
+            const items: string[] = Array.isArray(sec.content?.items) ? sec.content.items : [];
+            return (
+              <section key={sec.id} className="min-w-0 rounded-2xl border border-line bg-card p-4 sm:p-6 shadow-sm">
+                <h2 className="text-xl font-bold mb-4 text-ink flex items-center gap-2">
+                  <span>✨</span>
+                  <span>{sec.title || 'أهم المميزات'}</span>
+                </h2>
+                <ul className="grid gap-3 sm:grid-cols-2">
+                  {items.map((feat, idx) => (
+                    <li key={idx} className="flex items-start gap-3 rounded-xl bg-paper p-3 border border-line/60 min-w-0">
+                      <span className="text-brand shrink-0 mt-0.5 font-bold">✓</span>
+                      <span className="text-sm leading-relaxed text-ink/90 break-words">{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            );
+          })}
 
-      {/* Configurable Landing Page Sections */}
-      {sections.filter((s) => s.enabled).length > 0 && (
-        <div className="mt-10 space-y-8 min-w-0">
-          {sections
-            .filter((s) => s.enabled)
-            .map((sec) => {
-              if (sec.type === 'features') {
-                const items: string[] = Array.isArray(sec.content?.items) ? sec.content.items : [];
-                return (
-                  <section key={sec.id} className="min-w-0 rounded-2xl border border-line bg-card p-4 sm:p-6 shadow-sm">
-                    <h2 className="text-xl font-bold mb-4 text-ink flex items-center gap-2">
-                      <span>✨</span>
-                      <span>{sec.title || 'أهم المميزات'}</span>
-                    </h2>
-                    <ul className="grid gap-3 sm:grid-cols-2">
-                      {items.map((feat, idx) => (
-                        <li key={idx} className="flex items-start gap-3 rounded-xl bg-paper p-3 border border-line/60 min-w-0">
-                          <span className="text-brand shrink-0 mt-0.5 font-bold">✓</span>
-                          <span className="text-sm leading-relaxed text-ink/90 break-words">{feat}</span>
-                        </li>
+          {sections.filter((s) => s.enabled && s.type === 'specs').map((sec) => {
+            const items: { label: string; value: string }[] = Array.isArray(sec.content?.items) ? sec.content.items : [];
+            return (
+              <section key={sec.id} className="min-w-0 rounded-2xl border border-line bg-card p-4 sm:p-6 shadow-sm">
+                <h2 className="text-xl font-bold mb-4 text-ink flex items-center gap-2">
+                  <span>📋</span>
+                  <span>{sec.title || 'المواصفات الفنية'}</span>
+                </h2>
+                <div className="overflow-x-auto rounded-xl border border-line">
+                  <table className="w-full min-w-full text-start text-sm divide-y divide-line">
+                    <tbody className="divide-y divide-line">
+                      {items.map((item, idx) => (
+                        <tr key={idx} className={idx % 2 === 0 ? 'bg-card' : 'bg-paper'}>
+                          <td className="w-1/3 px-3 py-2.5 sm:px-4 sm:py-3 font-semibold text-muted break-words">{item.label}</td>
+                          <td className="px-3 py-2.5 sm:px-4 sm:py-3 text-ink font-medium break-words">{item.value}</td>
+                        </tr>
                       ))}
-                    </ul>
-                  </section>
-                );
-              }
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            );
+          })}
 
-              if (sec.type === 'specs') {
-                const items: { label: string; value: string }[] = Array.isArray(sec.content?.items) ? sec.content.items : [];
-                return (
-                  <section key={sec.id} className="min-w-0 rounded-2xl border border-line bg-card p-4 sm:p-6 shadow-sm">
-                    <h2 className="text-xl font-bold mb-4 text-ink flex items-center gap-2">
-                      <span>📋</span>
-                      <span>{sec.title || 'المواصفات الفنية'}</span>
-                    </h2>
-                    <div className="overflow-x-auto rounded-xl border border-line">
-                      <table className="w-full min-w-full text-start text-sm divide-y divide-line">
-                        <tbody className="divide-y divide-line">
-                          {items.map((item, idx) => (
-                            <tr key={idx} className={idx % 2 === 0 ? 'bg-card' : 'bg-paper'}>
-                              <td className="w-1/3 px-3 py-2.5 sm:px-4 sm:py-3 font-semibold text-muted break-words">{item.label}</td>
-                              <td className="px-3 py-2.5 sm:px-4 sm:py-3 text-ink font-medium break-words">{item.value}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </section>
-                );
-              }
+          {product.videoUrl && (
+            <section className="min-w-0 rounded-2xl border border-line bg-card p-4 sm:p-6 shadow-sm">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <span>🎬</span>
+                <span>فيديو توضيحي للمنتج وتجربة الاستخدام</span>
+              </h2>
+              <div className="max-w-3xl mx-auto min-w-0">
+                <VideoPlayer url={product.videoUrl} title={product.name} />
+              </div>
+            </section>
+          )}
+        </div>
 
-              if (sec.type === 'faq') {
+        {/* 5) Order form */}
+        <div id="order-form" ref={orderFormRef} className="order-5 min-w-0">
+          <AlgeriaOrderForm product={product} />
+        </div>
+
+        {/* 6) FAQ */}
+        {sections.filter((s) => s.enabled && s.type === 'faq').length > 0 && (
+          <div className="order-6 space-y-6 min-w-0">
+            {sections
+              .filter((s) => s.enabled && s.type === 'faq')
+              .map((sec) => {
                 const items: { q: string; a: string }[] = Array.isArray(sec.content?.items) ? sec.content.items : [];
                 return (
                   <section key={sec.id} className="min-w-0 rounded-2xl border border-line bg-card p-4 sm:p-6 shadow-sm">
@@ -197,22 +203,12 @@ export function ProductPage() {
                     </div>
                   </section>
                 );
-              }
+              })}
+          </div>
+        )}
+      </div>
 
-              return null;
-            })}
-        </div>
-      )}
-
-      {/* Long Description if present */}
-      {product.description && (
-        <section className="min-w-0 mt-8 rounded-2xl border border-line bg-card p-4 sm:p-6 shadow-sm">
-          <h2 className="text-xl font-bold mb-3 text-ink">تفاصيل المنتج</h2>
-          <p className="whitespace-pre-line leading-relaxed text-ink/85 break-words">{product.description}</p>
-        </section>
-      )}
-
-      {/* Related Products */}
+      {/* 7) Related products (same category) */}
       {related.length > 0 && (
         <div className="mt-12 min-w-0">
           <ProductRail title="منتجات أخرى قد تعجبك" products={related} />
