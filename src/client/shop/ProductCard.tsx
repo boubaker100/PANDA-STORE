@@ -64,13 +64,8 @@ export function ProductRail({ title, products, moreLink }: { title: string; prod
   if (products.length === 0) return null;
   return (
     <section className="mt-10 min-w-0">
-      <div className="mb-4 flex items-end justify-between px-1 sm:px-4">
+      <div className="mb-4 px-1 sm:px-4">
         <h2 className="text-xl font-bold md:text-2xl">{title}</h2>
-        {moreLink && (
-          <Link to={moreLink} className="flex items-center gap-0.5 text-sm font-semibold text-brand">
-            عرض الكل <ChevronIcon width={18} height={18} />
-          </Link>
-        )}
       </div>
       <ul className="no-scrollbar flex snap-x gap-3 overflow-x-auto px-1 sm:px-4 pb-1 md:grid md:grid-cols-4 md:overflow-visible lg:grid-cols-5 overscroll-x-contain">
         {products.map((product) => (
@@ -79,6 +74,16 @@ export function ProductRail({ title, products, moreLink }: { title: string; prod
           </li>
         ))}
       </ul>
+      {moreLink && (
+        <div className="mt-4 flex justify-center px-1 sm:justify-start sm:px-4">
+          <Link
+            to={moreLink}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-card px-5 py-2.5 text-sm font-semibold text-brand transition hover:bg-brand/5"
+          >
+            عرض الكل <ChevronIcon width={18} height={18} />
+          </Link>
+        </div>
+      )}
     </section>
   );
 }
