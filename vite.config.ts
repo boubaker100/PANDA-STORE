@@ -30,7 +30,7 @@ export default defineConfig({
   server: {
     port: 5174,
     strictPort: true,
-      allowedHosts: ["breeding-accuracy-fantastic-humans.trycloudflare.com"],
+      allowedHosts: [".trycloudflare.com"],
     watch: {
       usePolling: true,
       interval: 300,

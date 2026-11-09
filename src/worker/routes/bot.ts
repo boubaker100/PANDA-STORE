@@ -4,7 +4,7 @@ import { orders, ORDER_STATUSES, type OrderStatus } from '../db/schema';
 import type { AppEnv } from '../env';
 import { isAdminId } from '../auth';
 import { botApi, sendMessage, STATUS_LABELS } from '../telegram';
-import { randomToken, getSettings } from './store';
+import { getSettings } from './store';
 import { changeOrderStatus } from './admin';
 
 interface Update {
@@ -63,10 +63,8 @@ async function onMessage(c: Context<AppEnv>, origin: string, chatId: number, use
 
   if (command === '/admin') {
     if (!isAdmin) return sendMessage(env, chatId, 'هذا الأمر لصاحب المتجر فقط.');
-    const code = randomToken(24);
-    await env.KV.put(`login:${code}`, String(userId), { expirationTtl: 600 });
-    return sendMessage(env, chatId, 'رابط دخول لوحة التحكم من المتصفح. صالح لمدة 10 دقائق ولمرة واحدة:', [
-      [{ text: 'فتح لوحة التحكم في المتصفح', url: `${origin}/admin/login#code=${code}` }],
+    return sendMessage(env, chatId, 'تُفتح لوحة التحكم داخل تيليجرام مباشرةً. اضغط الزر أدناه:', [
+      [{ text: 'فتح لوحة التحكم', web_app: { url: `${origin}/admin` } }],
     ]);
   }
 

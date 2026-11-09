@@ -70,6 +70,141 @@ const EMPTY_FORM: FormState = {
   available: true,
 };
 
+
+// ===== Smart Paste Parsers =====
+const HEADER_WORDS =
+  /^(الخاصية|الخصائص|المواصفة|المواصفات|الميزة|الميزات|المميزات|feature|features?|spec|specs?|specification|specifications?|label|value|key|item|items?|description)$/i;
+const BULLET_PREFIX = /^[\s]*[-*\u2022\u00b7\u25cf\u25cb\u2705\u2714\u2611\u2713\u25ba\u25b6\u2192]\s*/u;
+const NUM_PREFIX = /^\d+[.)]\s*/;
+const SEPARATOR_ONLY = /^[-:\s]+$/;
+const EMOJI_LEAD = /^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]+\s*/u;
+
+function cleanText(raw: string): string {
+  let s = raw.trim();
+  s = s.replace(BULLET_PREFIX, '').replace(NUM_PREFIX, '');
+  s = s.replace(/\*\*/g, '').replace(/__/g, '');
+  s = s.replace(EMOJI_LEAD, '');
+  return s.trim();
+}
+
+function splitTableRow(line: string): string[] | null {
+  if (!line.trim().startsWith('|')) return null;
+  return line.split('|').map((c) => c.trim()).filter((c) => c.length > 0);
+}
+
+function parseFeatures(text: string): string[] {
+  const out: string[] = [];
+  for (const rawLine of text.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line) continue;
+    const cells = splitTableRow(line);
+    if (cells) {
+      if (cells.length === 0) continue;
+      if (cells.every((c) => SEPARATOR_ONLY.test(c))) continue;
+      if (cells.length === 1 && HEADER_WORDS.test(cells[0])) continue;
+      if (cells.length >= 2 && HEADER_WORDS.test(cells[0]) && HEADER_WORDS.test(cells[1])) continue;
+      const joined = cells.map(cleanText).filter(Boolean).join(' \u2014 ');
+      if (joined) out.push(joined);
+      continue;
+    }
+    const cleaned = cleanText(line);
+    if (!cleaned || HEADER_WORDS.test(cleaned)) continue;
+    out.push(cleaned);
+  }
+  return out;
+}
+
+function parseSpecs(text: string): { label: string; value: string }[] {
+  const out: { label: string; value: string }[] = [];
+  for (const rawLine of text.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line) continue;
+    const cells = splitTableRow(line);
+    if (cells) {
+      if (cells.length === 0) continue;
+      if (cells.every((c) => SEPARATOR_ONLY.test(c))) continue;
+      if (cells.length === 1) {
+        if (HEADER_WORDS.test(cells[0])) continue;
+        const m = cells[0].match(/^([^:]+):\s*(.+)$/);
+        if (m) { out.push({ label: cleanText(m[1]), value: cleanText(m[2]) }); continue; }
+        out.push({ label: cleanText(cells[0]), value: '' });
+        continue;
+      }
+      if (HEADER_WORDS.test(cells[0]) && cells.slice(1).every((c) => HEADER_WORDS.test(c) || SEPARATOR_ONLY.test(c))) continue;
+      const label = cleanText(cells[0]);
+      const value = cells.slice(1).map(cleanText).filter(Boolean).join(' \u2014 ');
+      if (label || value) out.push({ label, value });
+      continue;
+    }
+    const cleaned = cleanText(line);
+    if (!cleaned || HEADER_WORDS.test(cleaned)) continue;
+    const colonMatch = cleaned.match(/^([^:]+):\s*(.+)$/);
+    if (colonMatch) { out.push({ label: colonMatch[1].trim(), value: colonMatch[2].trim() }); continue; }
+    const dashMatch = cleaned.match(/^([^\-\u2014\u2013=]+?)\s*[-\u2014\u2013=]\s*(.+)$/);
+    if (dashMatch) { out.push({ label: dashMatch[1].trim(), value: dashMatch[2].trim() }); continue; }
+    out.push({ label: cleaned, value: '' });
+  }
+  return out;
+}
+
+
+function parseFaq(text: string): { q: string; a: string }[] {
+  const out: { q: string; a: string }[] = [];
+  let currentQ = '';
+  let currentA = '';
+  let inAnswer = false;
+
+  const flush = () => {
+    const q = currentQ.trim();
+    const a = currentA.trim();
+    if (q || a) out.push({ q: q || '(سؤال)', a });
+    currentQ = '';
+    currentA = '';
+    inAnswer = false;
+  };
+
+  for (const raw of text.split(/\r?\n/)) {
+    let line = raw.trim();
+    if (!line) {
+      if (currentQ || currentA) flush();
+      continue;
+    }
+    line = line
+      .replace(/\*\*/g, '')
+      .replace(/__/g, '')
+      .replace(/^#+\s*/, '')
+      .replace(/^[-\u2022]\s+/, '')
+      .replace(/^\d+[.)]\s+/, '')
+      .trim();
+    if (!line) continue;
+
+    const qMatch = line.match(/^(?:س(?:ؤال)?|Q(?:uestion)?)\s*[:\uFF1A.\-]\s*(.*)$/i);
+    const aMatch = line.match(/^(?:ج(?:واب)?|A(?:nswer)?)\s*[:\uFF1A.\-]\s*(.*)$/i);
+
+    if (qMatch) {
+      if (currentQ || currentA) flush();
+      currentQ = qMatch[1].trim();
+      inAnswer = false;
+    } else if (aMatch) {
+      currentA = aMatch[1].trim();
+      inAnswer = true;
+    } else if (inAnswer) {
+      currentA = (currentA ? currentA + '\n' : '') + line;
+    } else if (currentQ) {
+      if (/[?\u061F]\s*$/.test(currentQ)) {
+        currentA = line;
+        inAnswer = true;
+      } else {
+        currentQ = currentQ + ' ' + line;
+      }
+    } else {
+      currentQ = line;
+    }
+  }
+  flush();
+  return out;
+}
+
 export function ProductForm() {
   const { id } = useParams();
   const isNew = !id;
@@ -77,6 +212,8 @@ export function ProductForm() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [pasteOpen, setPasteOpen] = useState<string | null>(null);
+  const [pasteText, setPasteText] = useState('');
   const [loading, setLoading] = useState(!isNew);
   const [uploading, setUploading] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -240,6 +377,63 @@ export function ProductForm() {
   }
 
   function removeSpecItem(secId: string, idx: number) {
+    setForm((f) => ({
+      ...f,
+      sections: f.sections.map((s) => {
+        if (s.id === secId) {
+          const items = (s.content?.items ?? []).filter((_: unknown, i: number) => i !== idx);
+          return { ...s, content: { ...s.content, items } };
+        }
+        return s;
+      }),
+    }));
+  }
+
+  function openPaste(secId: string) {
+    setPasteOpen(secId);
+    setPasteText('');
+  }
+
+  function closePaste() {
+    setPasteOpen(null);
+    setPasteText('');
+  }
+
+  function applyPaste(secId: string, kind: 'features' | 'specs' | 'faq') {
+    const items =
+      kind === 'features'
+        ? parseFeatures(pasteText)
+        : kind === 'specs'
+          ? parseSpecs(pasteText)
+          : parseFaq(pasteText);
+    if (items.length === 0) return;
+    setForm((f) => ({
+      ...f,
+      sections: f.sections.map((s) => {
+        if (s.id !== secId) return s;
+        const existing = Array.isArray(s.content?.items) ? s.content.items : [];
+        return { ...s, content: { ...s.content, items: [...existing, ...items] } };
+      }),
+    }));
+    closePaste();
+  }
+
+  function addFaqItem(secId: string) {
+    setForm((f) => ({
+      ...f,
+      sections: f.sections.map((s) => {
+        if (s.id === secId) {
+          const items = Array.isArray(s.content?.items)
+            ? [...s.content.items, { q: 'سؤال جديد', a: 'الجواب هنا' }]
+            : [{ q: 'سؤال جديد', a: 'الجواب هنا' }];
+          return { ...s, content: { ...s.content, items } };
+        }
+        return s;
+      }),
+    }));
+  }
+
+  function removeFaqItem(secId: string, idx: number) {
     setForm((f) => ({
       ...f,
       sections: f.sections.map((s) => {
@@ -612,9 +806,165 @@ export function ProductForm() {
                           </button>
                         </div>
                       ))}
-                      <Button type="button" size="sm" onClick={() => addFeatureItem(sec.id)}>
-                        + إضافة ميزة
-                      </Button>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Button type="button" size="sm" onClick={() => addFeatureItem(sec.id)}>
+                          + إضافة ميزة
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="plain"
+                          onClick={() => (pasteOpen === sec.id ? closePaste() : openPaste(sec.id))}
+                        >
+                          📋 لصق ذكي
+                        </Button>
+                      </div>
+
+                      {pasteOpen === sec.id && (
+                        <div className="mt-2 rounded-lg border border-brand/40 bg-brand/5 p-3 space-y-2">
+                          <label className="block text-xs font-bold text-brand">
+                            الصق قائمة المميزات من الذكاء الاصطناعي (نقاط، جدول، أو نص عادي):
+                          </label>
+                          <textarea
+                            className="field text-xs font-mono w-full min-h-[8rem]"
+                            placeholder="مثال: ✅ خامة قطنية — تصميم عصري — مقاوم للماء"
+                            value={pasteText}
+                            onChange={(e) => setPasteText(e.target.value)}
+                          />
+                          {pasteText.trim() && (() => {
+                            const parsed = parseFeatures(pasteText);
+                            return (
+                              <div className="text-xs text-muted">
+                                سيتم إضافة <b className="text-brand">{parsed.length}</b> عنصر:
+                                {parsed.slice(0, 3).map((p, i) => (
+                                  <div key={i} className="truncate opacity-80">• {p}</div>
+                                ))}
+                                {parsed.length > 3 && <div className="opacity-60">... و{parsed.length - 3} أخرى</div>}
+                              </div>
+                            );
+                          })()}
+                          <div className="flex gap-2">
+                            <Button type="button" size="sm" onClick={() => applyPaste(sec.id, 'features')}>
+                              تطبيق
+                            </Button>
+                            <Button type="button" size="sm" variant="ghost" onClick={closePaste}>
+                              إلغاء
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* FAQ editor */}
+                  {sec.type === 'faq' && (
+                    <div className="space-y-2">
+                      <label className="block text-xs font-semibold text-muted">الأسئلة والأجوبة:</label>
+                      {(sec.content?.items ?? []).map((faq: { q: string; a: string }, idx: number) => (
+                        <div key={idx} className="rounded-lg border border-line/60 bg-card p-2 space-y-1.5">
+                          <div className="flex items-start gap-2">
+                            <span className="text-xs font-bold text-brand shrink-0 pt-2">س:</span>
+                            <textarea
+                              className="field text-xs sm:text-sm flex-1 min-h-[2.5rem]"
+                              rows={2}
+                              placeholder="السؤال"
+                              value={faq.q || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setForm((f) => ({
+                                  ...f,
+                                  sections: f.sections.map((s) => {
+                                    if (s.id === sec.id) {
+                                      const next = [...s.content.items];
+                                      next[idx] = { ...next[idx], q: val };
+                                      return { ...s, content: { ...s.content, items: next } };
+                                    }
+                                    return s;
+                                  }),
+                                }));
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeFaqItem(sec.id, idx)}
+                              className="text-rose-600 font-bold px-2 pt-1 shrink-0"
+                              title="حذف السؤال"
+                            >
+                              ×
+                            </button>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="text-xs font-bold text-muted shrink-0 pt-2">ج:</span>
+                            <textarea
+                              className="field text-xs sm:text-sm flex-1 min-h-[3.5rem]"
+                              rows={3}
+                              placeholder="الجواب"
+                              value={faq.a || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setForm((f) => ({
+                                  ...f,
+                                  sections: f.sections.map((s) => {
+                                    if (s.id === sec.id) {
+                                      const next = [...s.content.items];
+                                      next[idx] = { ...next[idx], a: val };
+                                      return { ...s, content: { ...s.content, items: next } };
+                                    }
+                                    return s;
+                                  }),
+                                }));
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Button type="button" size="sm" onClick={() => addFaqItem(sec.id)}>
+                          + إضافة سؤال
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="plain"
+                          onClick={() => (pasteOpen === sec.id ? closePaste() : openPaste(sec.id))}
+                        >
+                          📋 لصق ذكي
+                        </Button>
+                      </div>
+
+                      {pasteOpen === sec.id && (
+                        <div className="mt-2 rounded-lg border border-brand/40 bg-brand/5 p-3 space-y-2">
+                          <label className="block text-xs font-bold text-brand">
+                            الصق الأسئلة والأجوبة (س: ... ج: ... أو Q: ... A: ...):
+                          </label>
+                          <textarea
+                            className="field text-xs font-mono w-full min-h-[10rem]"
+                            placeholder={'س: كم مدة التوصيل؟\nج: 24-48 ساعة\n\nس: هل الضمان متوفر؟\nج: نعم، سنة كاملة'}
+                            value={pasteText}
+                            onChange={(e) => setPasteText(e.target.value)}
+                          />
+                          {pasteText.trim() && (() => {
+                            const parsed = parseFaq(pasteText);
+                            return (
+                              <div className="text-xs text-muted">
+                                سيتم إضافة <b className="text-brand">{parsed.length}</b> سؤال:
+                                {parsed.slice(0, 3).map((p, i) => (
+                                  <div key={i} className="truncate opacity-80">• {p.q}</div>
+                                ))}
+                                {parsed.length > 3 && <div className="opacity-60">... و{parsed.length - 3} أسئلة أخرى</div>}
+                              </div>
+                            );
+                          })()}
+                          <div className="flex gap-2">
+                            <Button type="button" size="sm" onClick={() => applyPaste(sec.id, 'faq')}>
+                              تطبيق
+                            </Button>
+                            <Button type="button" size="sm" variant="ghost" onClick={closePaste}>
+                              إلغاء
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -671,9 +1021,53 @@ export function ProductForm() {
                           </button>
                         </div>
                       ))}
-                      <Button type="button" size="sm" onClick={() => addSpecItem(sec.id)}>
-                        + إضافة خاصية
-                      </Button>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Button type="button" size="sm" onClick={() => addSpecItem(sec.id)}>
+                          + إضافة خاصية
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="plain"
+                          onClick={() => (pasteOpen === sec.id ? closePaste() : openPaste(sec.id))}
+                        >
+                          📋 لصق ذكي
+                        </Button>
+                      </div>
+
+                      {pasteOpen === sec.id && (
+                        <div className="mt-2 rounded-lg border border-brand/40 bg-brand/5 p-3 space-y-2">
+                          <label className="block text-xs font-bold text-brand">
+                            الصق جدول المواصفات من الذكاء الاصطناعي (جدول، نقاط بـ :، أو سطور بـ =):
+                          </label>
+                          <textarea
+                            className="field text-xs font-mono w-full min-h-[8rem]"
+                            placeholder="مثال: | الخامة | قطن 100% | أو — الوزن: 250 جرام"
+                            value={pasteText}
+                            onChange={(e) => setPasteText(e.target.value)}
+                          />
+                          {pasteText.trim() && (() => {
+                            const parsed = parseSpecs(pasteText);
+                            return (
+                              <div className="text-xs text-muted">
+                                سيتم إضافة <b className="text-brand">{parsed.length}</b> خاصية:
+                                {parsed.slice(0, 3).map((p, i) => (
+                                  <div key={i} className="truncate opacity-80">• {p.label} → {p.value || '—'}</div>
+                                ))}
+                                {parsed.length > 3 && <div className="opacity-60">... و{parsed.length - 3} أخرى</div>}
+                              </div>
+                            );
+                          })()}
+                          <div className="flex gap-2">
+                            <Button type="button" size="sm" onClick={() => applyPaste(sec.id, 'specs')}>
+                              تطبيق
+                            </Button>
+                            <Button type="button" size="sm" variant="ghost" onClick={closePaste}>
+                              إلغاء
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

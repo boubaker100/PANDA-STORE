@@ -181,7 +181,7 @@ store.post("/auth/login", async (c) => {
   // 5. Handle failure: generic error message to prevent user enumeration
   if (!isValid) {
     const LOCK_DURATION = 15 * 60; // 15 minutes lockout
-    const MAX_ATTEMPTS = 5;
+    const MAX_ATTEMPTS = 15;
 
     const nextIpAttempts = (ipRecord?.attempts ?? 0) + 1;
     const ipLockUntil = nextIpAttempts >= MAX_ATTEMPTS ? now + LOCK_DURATION : null;
@@ -240,23 +240,6 @@ store.post("/auth/login", async (c) => {
     tokenVersion: admin!.tokenVersion,
   });
 
-  return c.json({ ok: true });
-});
-
-/** Website admin login: the one-time code the bot sends after /admin. */
-store.post("/auth/admin-link", async (c) => {
-  const { code } = await c.req.json<{ code?: string }>();
-  const key = `login:${code ?? ""}`;
-  const telegramId =
-    code && /^[A-Za-z0-9_-]{20,}$/.test(code) ? await c.env.KV.get(key) : null;
-  if (!telegramId || !isAdminId(c.env, telegramId)) {
-    return c.json(
-      { error: "الرابط منتهي أو مستخدم. اكتب /admin للبوت لرابط جديد." },
-      401,
-    );
-  }
-  await c.env.KV.delete(key);
-  await setAdminCookie(c, { role: "admin", tg: telegramId });
   return c.json({ ok: true });
 });
 

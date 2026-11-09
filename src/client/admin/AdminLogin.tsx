@@ -1,20 +1,17 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useApp } from '../state';
-import { Button, Notice, Spinner } from '../components/ui';
+import { Button, Notice } from '../components/ui';
 import { api } from '../lib/api';
 
 /**
- * Website admin login.
- * Telegram one-time login links continue to work.
+ * Website admin login (email + password).
+ * Telegram admins use the Mini App instead — no link codes here.
  */
 export function AdminLogin({ onSignedIn }: { onSignedIn: () => void }) {
   const { data } = useApp();
   const navigate = useNavigate();
-  const code = new URLSearchParams(window.location.hash.slice(1)).get('code');
   const [error, setError] = useState<string | null>(null);
-  const [exchanging, setExchanging] = useState(Boolean(code));
   const [devLogin, setDevLogin] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -26,20 +23,6 @@ export function AdminLogin({ onSignedIn }: { onSignedIn: () => void }) {
     api<{ available: boolean }>('/auth/dev-login')
       .then((r) => setDevLogin(r.available))
       .catch(() => {});
-
-    if (!code) return;
-
-    history.replaceState(null, '', '/admin');
-
-    api('/auth/admin-link', { json: { code } })
-      .then(() => {
-        navigate('/admin', { replace: true });
-        onSignedIn();
-      })
-      .catch((e) => {
-        setError(e.message);
-        setExchanging(false);
-      });
   }, []);
 
   async function handleLogin(e: React.FormEvent) {
@@ -56,10 +39,6 @@ export function AdminLogin({ onSignedIn }: { onSignedIn: () => void }) {
     } finally {
       setBusy(false);
     }
-  }
-
-  if (exchanging) {
-    return <Spinner label="جارٍ تسجيل الدخول…" />;
   }
 
   return (
@@ -104,7 +83,7 @@ export function AdminLogin({ onSignedIn }: { onSignedIn: () => void }) {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <Button type="submit" variant="primary" className="w-full" busy={busy}>
+          <Button type="submit" variant="brand" className="w-full" busy={busy}>
             تسجيل الدخول
           </Button>
         </form>
@@ -116,15 +95,6 @@ export function AdminLogin({ onSignedIn }: { onSignedIn: () => void }) {
           >
             العودة إلى الصفحة الرئيسية
           </a>
-
-          <div className="relative py-2">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-line"></div></div>
-            <div className="relative flex justify-center text-xs uppercase"><span className="bg-surface px-2 text-muted">أو الدخول عبر</span></div>
-          </div>
-
-          <p className="text-center text-xs text-muted">
-            يمكنك أيضاً الدخول عبر الرابط المرسل من بوت التيليجرام الخاص بك باستخدام أمر <code className="rounded bg-ink/5 px-1">/admin</code>
-          </p>
         </div>
 
         {devLogin && (
@@ -155,4 +125,3 @@ export function AdminLogin({ onSignedIn }: { onSignedIn: () => void }) {
     </main>
   );
 }
-

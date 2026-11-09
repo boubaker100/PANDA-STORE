@@ -190,8 +190,8 @@ export function ProductPage() {
                     <div className="space-y-3">
                       {items.map((faq, idx) => (
                         <div key={idx} className="rounded-xl border border-line bg-paper p-4 min-w-0">
-                          <h3 className="font-bold text-sm text-ink mb-1.5 break-words">{faq.q}</h3>
-                          <p className="text-xs sm:text-sm text-muted leading-relaxed break-words">{faq.a}</p>
+                          <h3 className="font-bold text-sm text-ink mb-1.5 break-words whitespace-pre-line">{faq.q}</h3>
+                          <p className="text-xs sm:text-sm text-muted leading-relaxed break-words whitespace-pre-line">{faq.a}</p>
                         </div>
                       ))}
                     </div>
