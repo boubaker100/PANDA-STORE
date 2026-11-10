@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Link } from 'react-router';
 import { useApp } from '../state';
 import { BankIcon, CashIcon, ShieldIcon, TruckIcon } from '../components/icons';
@@ -64,6 +64,86 @@ export function Home() {
   );
 }
 
+function titleSizeClass(size: string): string {
+  const map: Record<string, string> = {
+    '': 'text-xl sm:text-3xl md:text-4xl',
+    sm: 'text-lg sm:text-xl md:text-2xl',
+    base: 'text-xl sm:text-2xl md:text-3xl',
+    lg: 'text-2xl sm:text-3xl md:text-4xl',
+    xl: 'text-2xl sm:text-4xl md:text-5xl',
+    '2xl': 'text-3xl sm:text-5xl md:text-6xl',
+  };
+  return map[size] ?? map[''];
+}
+
+function subtitleSizeClass(size: string): string {
+  const map: Record<string, string> = {
+    '': 'text-[13px] sm:text-base md:text-lg',
+    sm: 'text-xs sm:text-sm md:text-base',
+    base: 'text-[13px] sm:text-base md:text-lg',
+    lg: 'text-sm sm:text-lg md:text-xl',
+    xl: 'text-base sm:text-xl md:text-2xl',
+    '2xl': 'text-lg sm:text-2xl md:text-3xl',
+  };
+  return map[size] ?? map[''];
+}
+
+function buttonRadiusClass(radius: string): string {
+  const map: Record<string, string> = {
+    '': 'rounded-lg',
+    none: 'rounded-none',
+    sm: 'rounded',
+    md: 'rounded-lg',
+    lg: 'rounded-xl',
+    full: 'rounded-full',
+  };
+  return map[radius] ?? map[''];
+}
+
+function hexToRgba(hex: string, opacity: number): string {
+  if (!hex) return 'transparent';
+  const h = hex.replace('#', '');
+  if (h.length !== 6) return hex;
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const a = Math.max(0, Math.min(100, opacity)) / 100;
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function titleStyle(b: Banner): CSSProperties {
+  const s: CSSProperties = { color: b.titleColor || '#ffffff' };
+  if (b.titleBg) s.backgroundColor = hexToRgba(b.titleBg, b.titleBgOpacity ?? 100);
+  if (b.titleBorderWidth > 0) s.border = `${b.titleBorderWidth}px solid ${b.titleBorderColor || '#ffffff'}`;
+  if (b.titleBg || b.titleBorderWidth > 0) {
+    s.padding = '4px 10px';
+    s.borderRadius = '8px';
+    s.display = 'inline-block';
+  }
+  return s;
+}
+
+function subtitleStyle(b: Banner): CSSProperties {
+  const s: CSSProperties = { color: b.subtitleColor || '#ffffff' };
+  if (b.subtitleBg) s.backgroundColor = hexToRgba(b.subtitleBg, b.subtitleBgOpacity ?? 100);
+  if (b.subtitleBorderWidth > 0) s.border = `${b.subtitleBorderWidth}px solid ${b.subtitleBorderColor || '#ffffff'}`;
+  if (b.subtitleBg || b.subtitleBorderWidth > 0) {
+    s.padding = '2px 8px';
+    s.borderRadius = '6px';
+    s.display = 'inline-block';
+  }
+  return s;
+}
+
+function buttonStyle(b: Banner): CSSProperties {
+  const s: CSSProperties = {
+    backgroundColor: hexToRgba(b.buttonBgColor || '#ffffff', b.buttonBgOpacity ?? 100),
+    color: b.buttonTextColor || '#1a1a1a',
+  };
+  if (b.buttonBorderWidth > 0) s.border = `${b.buttonBorderWidth}px solid ${b.buttonBorderColor || '#000000'}`;
+  return s;
+}
+
 function BannerSlider({ banners }: { banners: Banner[] }) {
   const track = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
@@ -98,10 +178,18 @@ function BannerSlider({ banners }: { banners: Banner[] }) {
               <img src={imageUrl(banner.imageKey)} alt="" className="absolute inset-0 size-full object-cover object-left" loading={i ? 'lazy' : 'eager'} />
               {(banner.title || banner.subtitle || banner.buttonText) && (
                 <div className="absolute inset-y-0 start-0 flex w-[55%] flex-col justify-center gap-2 ps-5 text-white md:w-1/2 md:gap-3 md:ps-14">
-                  {banner.title && <p className="text-xl font-bold leading-tight drop-shadow sm:text-3xl md:text-4xl">{banner.title}</p>}
-                  {banner.subtitle && <p className="text-[13px] leading-relaxed text-white/85 sm:text-base md:text-lg">{banner.subtitle}</p>}
+                  {banner.title && (
+                    <p className={`${titleSizeClass(banner.titleFontSize)} font-bold leading-tight drop-shadow`} style={titleStyle(banner)}>
+                      {banner.title}
+                    </p>
+                  )}
+                  {banner.subtitle && (
+                    <p className={`${subtitleSizeClass(banner.subtitleFontSize)} leading-relaxed`} style={subtitleStyle(banner)}>
+                      {banner.subtitle}
+                    </p>
+                  )}
                   {banner.buttonText && (
-                    <span className="mt-1 inline-flex w-fit rounded-lg bg-white px-3.5 py-2 text-[13px] font-semibold text-ink md:px-5 md:py-2.5 md:text-base">
+                    <span className={`mt-1 inline-flex w-fit px-3.5 py-2 text-[13px] font-semibold md:px-5 md:py-2.5 md:text-base ${buttonRadiusClass(banner.buttonRadius)}`} style={buttonStyle(banner)}>
                       {banner.buttonText}
                     </span>
                   )}

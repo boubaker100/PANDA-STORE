@@ -54,8 +54,26 @@ export interface Banner {
   id: number;
   imageKey: string;
   title: string;
+  titleColor: string;
+  titleBg: string;
+  titleBgOpacity: number;
+  titleBorderColor: string;
+  titleBorderWidth: number;
+  titleFontSize: string;
   subtitle: string;
+  subtitleColor: string;
+  subtitleBg: string;
+  subtitleBgOpacity: number;
+  subtitleBorderColor: string;
+  subtitleBorderWidth: number;
+  subtitleFontSize: string;
   buttonText: string;
+  buttonBgColor: string;
+  buttonBgOpacity: number;
+  buttonTextColor: string;
+  buttonBorderColor: string;
+  buttonBorderWidth: number;
+  buttonRadius: string;
   link: string;
   sort: number;
 }

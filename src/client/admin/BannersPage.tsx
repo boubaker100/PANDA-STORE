@@ -9,7 +9,13 @@ import { confirmAction, haptic } from '../lib/telegram';
 import type { Banner } from '../types';
 
 type Draft = Omit<Banner, 'id' | 'sort'> & { id?: number };
-const EMPTY: Draft = { imageKey: '', title: '', subtitle: '', buttonText: '', link: '' };
+const EMPTY: Draft = {
+  imageKey: '',
+  title: '', titleColor: '#ffffff', titleBg: '', titleBgOpacity: 100, titleBorderColor: '', titleBorderWidth: 0, titleFontSize: '',
+  subtitle: '', subtitleColor: '#ffffff', subtitleBg: '', subtitleBgOpacity: 100, subtitleBorderColor: '', subtitleBorderWidth: 0, subtitleFontSize: '',
+  buttonText: '', buttonBgColor: '#ffffff', buttonBgOpacity: 100, buttonTextColor: '#1a1a1a', buttonBorderColor: '', buttonBorderWidth: 0, buttonRadius: '',
+  link: '',
+};
 
 export function BannersPage() {
   const { data, reload } = useApp();
@@ -153,35 +159,67 @@ function BannerForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
         <input type="file" accept="image/*" className="sr-only" onChange={(e) => upload(e.target.files?.[0])} />
       </label>
       <p className="-mt-3 text-xs text-muted">يظهر النص على الجانب الأيمن، ويقص الجوال أطراف الصورة. ضع العنصر المهم في الثلث الأيسر واترك اليمين هادئاً.</p>
-      <Field label="العنوان">
-        <input className="field" value={form.title} onChange={(e) => set('title', e.target.value)} maxLength={80} placeholder="مثلاً: خصم 20% على القهوة المختصة" />
-      </Field>
-      <Field label="وصف قصير">
-        <input className="field" value={form.subtitle} onChange={(e) => set('subtitle', e.target.value)} maxLength={140} />
-      </Field>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="نص الزر" hint="اتركه فارغاً لإخفاء الزر">
+      {/* Title */}
+      <div className="space-y-2 rounded-xl border border-line bg-card p-3">
+        <p className="text-xs font-bold text-muted">✏️ العنوان</p>
+        <div className="flex gap-2">
+          <input className="field flex-1" value={form.title} onChange={(e) => set('title', e.target.value)} maxLength={80} placeholder="مثلاً: خصم 20% على القهوة المختصة" />
+          <label className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-line bg-card px-2.5" title="لون النص">
+            <input type="color" className="size-7 cursor-pointer rounded border-0 bg-transparent p-0" value={form.titleColor || '#ffffff'} onChange={(e) => set('titleColor', e.target.value)} />
+            <span className="text-xs font-medium text-muted">نص</span>
+          </label>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+          <ColorField label="خلفية" value={form.titleBg} onChange={(v) => set('titleBg', v)} />
+          <OpacityField label="شفافية" value={form.titleBgOpacity} onChange={(v) => set('titleBgOpacity', v)} />
+          <ColorField label="بوردر" value={form.titleBorderColor} onChange={(v) => set('titleBorderColor', v)} />
+          <NumberField label="سماكة" value={form.titleBorderWidth} onChange={(v) => set('titleBorderWidth', v)} />
+          <SizeField label="حجم" value={form.titleFontSize} onChange={(v) => set('titleFontSize', v)} />
+        </div>
+      </div>
+
+      {/* Subtitle */}
+      <div className="space-y-2 rounded-xl border border-line bg-card p-3">
+        <p className="text-xs font-bold text-muted">📝 الوصف القصير</p>
+        <div className="flex gap-2">
+          <input className="field flex-1" value={form.subtitle} onChange={(e) => set('subtitle', e.target.value)} maxLength={140} />
+          <label className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-line bg-card px-2.5" title="لون النص">
+            <input type="color" className="size-7 cursor-pointer rounded border-0 bg-transparent p-0" value={form.subtitleColor || '#ffffff'} onChange={(e) => set('subtitleColor', e.target.value)} />
+            <span className="text-xs font-medium text-muted">نص</span>
+          </label>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+          <ColorField label="خلفية" value={form.subtitleBg} onChange={(v) => set('subtitleBg', v)} />
+          <OpacityField label="شفافية" value={form.subtitleBgOpacity} onChange={(v) => set('subtitleBgOpacity', v)} />
+          <ColorField label="بوردر" value={form.subtitleBorderColor} onChange={(v) => set('subtitleBorderColor', v)} />
+          <NumberField label="سماكة" value={form.subtitleBorderWidth} onChange={(v) => set('subtitleBorderWidth', v)} />
+          <SizeField label="حجم" value={form.subtitleFontSize} onChange={(v) => set('subtitleFontSize', v)} />
+        </div>
+      </div>
+
+      {/* Button */}
+      <div className="space-y-2 rounded-xl border border-line bg-card p-3">
+        <p className="text-xs font-bold text-muted">🔘 الزر (اختياري)</p>
+        <div className="grid gap-2 sm:grid-cols-2">
           <input className="field" value={form.buttonText} onChange={(e) => set('buttonText', e.target.value)} maxLength={30} placeholder="تسوّق الآن" />
-        </Field>
-        <Field label="عند الضغط يفتح">
           <select className="field" value={form.link} onChange={(e) => set('link', e.target.value)}>
-            <option value="">لا شيء</option>
+            <option value="">عند الضغط: لا شيء</option>
             <optgroup label="قسم">
-              {data!.categories.map((c) => (
-                <option key={c.id} value={`/c/${c.id}`}>
-                  {c.name}
-                </option>
-              ))}
+              {data!.categories.map((c) => (<option key={c.id} value={`/c/${c.id}`}>{c.name}</option>))}
             </optgroup>
             <optgroup label="منتج">
-              {data!.products.map((p) => (
-                <option key={p.id} value={`/p/${p.id}`}>
-                  {p.name}
-                </option>
-              ))}
+              {data!.products.map((p) => (<option key={p.id} value={`/p/${p.id}`}>{p.name}</option>))}
             </optgroup>
           </select>
-        </Field>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-6">
+          <ColorField label="خلفية" value={form.buttonBgColor} onChange={(v) => set('buttonBgColor', v)} />
+          <OpacityField label="شفافية" value={form.buttonBgOpacity} onChange={(v) => set('buttonBgOpacity', v)} />
+          <ColorField label="نص" value={form.buttonTextColor} onChange={(v) => set('buttonTextColor', v)} />
+          <ColorField label="بوردر" value={form.buttonBorderColor} onChange={(v) => set('buttonBorderColor', v)} />
+          <NumberField label="سماكة" value={form.buttonBorderWidth} onChange={(v) => set('buttonBorderWidth', v)} />
+          <RadiusField label="زوايا" value={form.buttonRadius} onChange={(v) => set('buttonRadius', v)} />
+        </div>
       </div>
       {error && <Notice tone="error">{error}</Notice>}
       <div className="flex gap-2">
@@ -193,5 +231,64 @@ function BannerForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
         </Button>
       </div>
     </form>
+  );
+}
+
+function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <label className="flex flex-col gap-1 text-[10px] text-muted">
+      <span>{label}</span>
+      <input type="color" className="h-8 w-full cursor-pointer rounded border border-line bg-card p-0.5" value={value || '#ffffff'} onChange={(e) => onChange(e.target.value)} />
+    </label>
+  );
+}
+
+function OpacityField({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+  return (
+    <label className="flex flex-col gap-1 text-[10px] text-muted">
+      <span>{label} <b className="text-ink">{value}%</b></span>
+      <input type="range" min={0} max={100} value={value} onChange={(e) => onChange(Number(e.target.value))} className="h-8 w-full cursor-pointer accent-brand" />
+    </label>
+  );
+}
+
+function NumberField({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+  return (
+    <label className="flex flex-col gap-1 text-[10px] text-muted">
+      <span>{label}</span>
+      <input type="number" className="field px-2 py-1 text-xs" min={0} max={10} value={value} onChange={(e) => onChange(Math.min(10, Math.max(0, Number(e.target.value) || 0)))} />
+    </label>
+  );
+}
+
+function SizeField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <label className="flex flex-col gap-1 text-[10px] text-muted">
+      <span>{label}</span>
+      <select className="field px-2 py-1 text-xs" value={value} onChange={(e) => onChange(e.target.value)}>
+        <option value="">افتراضي</option>
+        <option value="sm">صغير</option>
+        <option value="base">عادي</option>
+        <option value="lg">كبير</option>
+        <option value="xl">أكبر</option>
+        <option value="2xl">ضخم</option>
+      </select>
+    </label>
+  );
+}
+
+function RadiusField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <label className="flex flex-col gap-1 text-[10px] text-muted">
+      <span>{label}</span>
+      <select className="field px-2 py-1 text-xs" value={value} onChange={(e) => onChange(e.target.value)}>
+        <option value="">افتراضي</option>
+        <option value="none">حاد</option>
+        <option value="sm">صغير</option>
+        <option value="md">متوسط</option>
+        <option value="lg">كبير</option>
+        <option value="full">دائري</option>
+      </select>
+    </label>
   );
 }

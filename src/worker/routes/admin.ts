@@ -418,6 +418,26 @@ admin.post('/categories/order', async (c) => {
 // ---------- Banners ----------
 
 function readBanner(body: Record<string, unknown>) {
+  const hex = (v: unknown, fallback: string) => {
+    const s = text(v, 7);
+    return /^#[0-9a-fA-F]{6}$/.test(s) ? s : fallback;
+  };
+  const hexOrEmpty = (v: unknown) => {
+    const s = text(v, 7);
+    return /^#[0-9a-fA-F]{6}$/.test(s) ? s : '';
+  };
+  const borderW = (v: unknown) => {
+    const n = wholeNumber(v);
+    return n === null ? 0 : Math.min(10, Math.max(0, n));
+  };
+  const opac = (v: unknown) => {
+    const n = wholeNumber(v);
+    return n === null ? 100 : Math.min(100, Math.max(0, n));
+  };
+  const fontS = (v: unknown) => {
+    const s = text(v, 10);
+    return ['sm', 'base', 'lg', 'xl', '2xl'].includes(s) ? s : '';
+  };
   const imageKey = text(body.imageKey, 200);
   if (!imageKey) return { error: 'اختر صورة البنر' } as const;
   const link = text(body.link, 100);
@@ -425,8 +445,26 @@ function readBanner(body: Record<string, unknown>) {
     value: {
       imageKey,
       title: text(body.title, 80),
+      titleColor: hex(body.titleColor, '#ffffff'),
+      titleBg: hexOrEmpty(body.titleBg),
+      titleBgOpacity: opac(body.titleBgOpacity),
+      titleBorderColor: hexOrEmpty(body.titleBorderColor),
+      titleBorderWidth: borderW(body.titleBorderWidth),
+      titleFontSize: fontS(body.titleFontSize),
       subtitle: text(body.subtitle, 140),
+      subtitleColor: hex(body.subtitleColor, '#ffffff'),
+      subtitleBg: hexOrEmpty(body.subtitleBg),
+      subtitleBgOpacity: opac(body.subtitleBgOpacity),
+      subtitleBorderColor: hexOrEmpty(body.subtitleBorderColor),
+      subtitleBorderWidth: borderW(body.subtitleBorderWidth),
+      subtitleFontSize: fontS(body.subtitleFontSize),
       buttonText: text(body.buttonText, 30),
+      buttonBgColor: hex(body.buttonBgColor, '#ffffff'),
+      buttonBgOpacity: opac(body.buttonBgOpacity),
+      buttonTextColor: hex(body.buttonTextColor, '#1a1a1a'),
+      buttonBorderColor: hexOrEmpty(body.buttonBorderColor),
+      buttonBorderWidth: borderW(body.buttonBorderWidth),
+      buttonRadius: text(body.buttonRadius, 10),
       link: /^\/(c|p)\/\d+$/.test(link) ? link : '',
     },
   } as const;
