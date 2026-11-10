@@ -127,6 +127,7 @@ export function titleStyle(b: BannerStyleInput): CSSProperties {
   if (b.titleBorderWidth > 0) s.border = `${b.titleBorderWidth}px solid ${b.titleBorderColor || '#ffffff'}`;
   if (b.titleTextStrokeWidth > 0) {
     (s as any).WebkitTextStroke = `${b.titleTextStrokeWidth / 10}px ${b.titleTextStrokeColor || '#000000'}`;
+    (s as any).paintOrder = 'stroke fill';
   }
   if (b.titleBg || b.titleBorderWidth > 0) {
     s.padding = '4px 10px';
@@ -142,6 +143,7 @@ export function subtitleStyle(b: BannerStyleInput): CSSProperties {
   if (b.subtitleBorderWidth > 0) s.border = `${b.subtitleBorderWidth}px solid ${b.subtitleBorderColor || '#ffffff'}`;
   if (b.subtitleTextStrokeWidth > 0) {
     (s as any).WebkitTextStroke = `${b.subtitleTextStrokeWidth / 10}px ${b.subtitleTextStrokeColor || '#000000'}`;
+    (s as any).paintOrder = 'stroke fill';
   }
   if (b.subtitleBg || b.subtitleBorderWidth > 0) {
     s.padding = '2px 8px';
@@ -159,6 +161,7 @@ export function buttonStyle(b: BannerStyleInput): CSSProperties {
   if (b.buttonBorderWidth > 0) s.border = `${b.buttonBorderWidth}px solid ${b.buttonBorderColor || '#000000'}`;
   if (b.buttonTextStrokeWidth > 0) {
     (s as any).WebkitTextStroke = `${b.buttonTextStrokeWidth / 10}px ${b.buttonTextStrokeColor || '#000000'}`;
+    (s as any).paintOrder = 'stroke fill';
   }
   return s;
 }
