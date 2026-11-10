@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { index, integer, sqliteTable, text, real} from 'drizzle-orm/sqlite-core';
 
 const timestamp = (name: string) =>
   integer(name)
@@ -51,30 +51,30 @@ export const banners = sqliteTable('banners', {
   title: text('title').notNull().default(''),
   titleColor: text('title_color').notNull().default('#ffffff'),
   titleBg: text('title_bg').notNull().default(''),
-  titleBgOpacity: integer('title_bg_opacity').notNull().default(100),
+  titleBgOpacity: real('title_bg_opacity').notNull().default(100),
   titleBorderColor: text('title_border_color').notNull().default(''),
-  titleBorderWidth: integer('title_border_width').notNull().default(0),
+  titleBorderWidth: real('title_border_width').notNull().default(0),
   titleFontSize: text('title_font_size').notNull().default(''),
   titleTextStrokeColor: text('title_text_stroke_color').notNull().default(''),
-  titleTextStrokeWidth: integer('title_text_stroke_width').notNull().default(0),
+  titleTextStrokeWidth: real('title_text_stroke_width').notNull().default(0),
   subtitle: text('subtitle').notNull().default(''),
   subtitleColor: text('subtitle_color').notNull().default('#ffffff'),
   subtitleBg: text('subtitle_bg').notNull().default(''),
-  subtitleBgOpacity: integer('subtitle_bg_opacity').notNull().default(100),
+  subtitleBgOpacity: real('subtitle_bg_opacity').notNull().default(100),
   subtitleBorderColor: text('subtitle_border_color').notNull().default(''),
-  subtitleBorderWidth: integer('subtitle_border_width').notNull().default(0),
+  subtitleBorderWidth: real('subtitle_border_width').notNull().default(0),
   subtitleFontSize: text('subtitle_font_size').notNull().default(''),
   subtitleTextStrokeColor: text('subtitle_text_stroke_color').notNull().default(''),
-  subtitleTextStrokeWidth: integer('subtitle_text_stroke_width').notNull().default(0),
+  subtitleTextStrokeWidth: real('subtitle_text_stroke_width').notNull().default(0),
   buttonText: text('button_text').notNull().default(''),
   buttonBgColor: text('button_bg_color').notNull().default('#ffffff'),
-  buttonBgOpacity: integer('button_bg_opacity').notNull().default(100),
+  buttonBgOpacity: real('button_bg_opacity').notNull().default(100),
   buttonTextColor: text('button_text_color').notNull().default('#1a1a1a'),
   buttonBorderColor: text('button_border_color').notNull().default(''),
-  buttonBorderWidth: integer('button_border_width').notNull().default(0),
+  buttonBorderWidth: real('button_border_width').notNull().default(0),
   buttonRadius: text('button_radius').notNull().default(''),
   buttonTextStrokeColor: text('button_text_stroke_color').notNull().default(''),
-  buttonTextStrokeWidth: integer('button_text_stroke_width').notNull().default(0),
+  buttonTextStrokeWidth: real('button_text_stroke_width').notNull().default(0),
   link: text('link').notNull().default(''),
   sort: integer('sort').notNull().default(0),
 });

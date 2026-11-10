@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useApp } from '../state';
 import { Button, Field, Notice } from '../components/ui';
 import { ImageIcon, PlusIcon, TrashIcon } from '../components/icons';
@@ -275,36 +275,78 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
 }
 
 function StrokeField({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+  const [text, setText] = useState(String(value));
+  useEffect(() => {
+    if (parseFloat(text) !== value) setText(String(value));
+  }, [value]);
   return (
     <label className="flex flex-col gap-1 text-[10px] text-muted">
       <span>{label}</span>
       <input
-        type="number"
-        className="field px-2 py-1 text-xs"
-        min={0}
-        max={3}
-        step={0.1}
-        value={(value / 10).toFixed(1)}
-        onChange={(e) => onChange(Math.round(Math.min(3, Math.max(0, Number(e.target.value) || 0)) * 10))}
+        type="number" className="field px-2 py-1 text-xs"
+        min={0} max={3} step={0.1}
+        value={text}
+        onChange={(e) => {
+          setText(e.target.value);
+          const n = parseFloat(e.target.value);
+          if (!isNaN(n)) onChange(Math.min(3, Math.max(0, n)));
+        }}
+        inputMode="decimal"
       />
     </label>
   );
 }
 
 function OpacityField({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+  const [text, setText] = useState(String(value));
+  useEffect(() => {
+    if (parseFloat(text) !== value) setText(String(value));
+  }, [value]);
   return (
     <label className="flex flex-col gap-1 text-[10px] text-muted">
-      <span>{label} <b className="text-ink">{value}%</b></span>
-      <input type="range" min={0} max={100} value={value} onChange={(e) => onChange(Number(e.target.value))} className="h-8 w-full cursor-pointer accent-brand" />
+      <span>{label} <b className="text-ink">{value.toFixed(1)}%</b></span>
+      <div className="flex items-center gap-1">
+        <input
+          type="range" min={0} max={100} step={1}
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className="h-8 flex-1 cursor-pointer accent-brand"
+        />
+        <input
+          type="number" min={0} max={100} step={0.1}
+          value={text}
+          onChange={(e) => {
+            setText(e.target.value);
+            const n = parseFloat(e.target.value);
+            if (!isNaN(n)) onChange(Math.min(100, Math.max(0, n)));
+          }}
+          className="field w-14 px-1 py-0.5 text-[10px]"
+          inputMode="decimal"
+        />
+      </div>
     </label>
   );
 }
 
 function NumberField({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+  const [text, setText] = useState(String(value));
+  useEffect(() => {
+    if (parseFloat(text) !== value) setText(String(value));
+  }, [value]);
   return (
     <label className="flex flex-col gap-1 text-[10px] text-muted">
       <span>{label}</span>
-      <input type="number" className="field px-2 py-1 text-xs" min={0} max={10} value={value} onChange={(e) => onChange(Math.min(10, Math.max(0, Number(e.target.value) || 0)))} />
+      <input
+        type="number" className="field px-2 py-1 text-xs"
+        min={0} max={10} step={0.1}
+        value={text}
+        onChange={(e) => {
+          setText(e.target.value);
+          const n = parseFloat(e.target.value);
+          if (!isNaN(n)) onChange(Math.min(10, Math.max(0, n)));
+        }}
+        inputMode="decimal"
+      />
     </label>
   );
 }

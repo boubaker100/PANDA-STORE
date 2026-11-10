@@ -426,14 +426,11 @@ function readBanner(body: Record<string, unknown>) {
     const s = text(v, 7);
     return /^#[0-9a-fA-F]{6}$/.test(s) ? s : '';
   };
-  const borderW = (v: unknown) => {
-    const n = wholeNumber(v);
-    return n === null ? 0 : Math.min(10, Math.max(0, n));
+  const floatW = (v: unknown, max: number) => {
+    const n = Number(v);
+    return isNaN(n) ? 0 : Math.min(max, Math.max(0, n));
   };
-  const opac = (v: unknown) => {
-    const n = wholeNumber(v);
-    return n === null ? 100 : Math.min(100, Math.max(0, n));
-  };
+  const opac = (v: unknown) => floatW(v, 100);
   const fontS = (v: unknown) => {
     const s = text(v, 10);
     return ['sm', 'base', 'lg', 'xl', '2xl'].includes(s) ? s : '';
@@ -449,28 +446,28 @@ function readBanner(body: Record<string, unknown>) {
       titleBg: hexOrEmpty(body.titleBg),
       titleBgOpacity: opac(body.titleBgOpacity),
       titleBorderColor: hexOrEmpty(body.titleBorderColor),
-      titleBorderWidth: borderW(body.titleBorderWidth),
+      titleBorderWidth: floatW(body.titleBorderWidth, 10),
       titleFontSize: fontS(body.titleFontSize),
       titleTextStrokeColor: hexOrEmpty(body.titleTextStrokeColor),
-      titleTextStrokeWidth: borderW(body.titleTextStrokeWidth),
+      titleTextStrokeWidth: floatW(body.titleTextStrokeWidth, 3),
       subtitle: text(body.subtitle, 140),
       subtitleColor: hex(body.subtitleColor, '#ffffff'),
       subtitleBg: hexOrEmpty(body.subtitleBg),
       subtitleBgOpacity: opac(body.subtitleBgOpacity),
       subtitleBorderColor: hexOrEmpty(body.subtitleBorderColor),
-      subtitleBorderWidth: borderW(body.subtitleBorderWidth),
+      subtitleBorderWidth: floatW(body.subtitleBorderWidth, 10),
       subtitleFontSize: fontS(body.subtitleFontSize),
       subtitleTextStrokeColor: hexOrEmpty(body.subtitleTextStrokeColor),
-      subtitleTextStrokeWidth: borderW(body.subtitleTextStrokeWidth),
+      subtitleTextStrokeWidth: floatW(body.subtitleTextStrokeWidth, 3),
       buttonText: text(body.buttonText, 30),
       buttonBgColor: hex(body.buttonBgColor, '#ffffff'),
       buttonBgOpacity: opac(body.buttonBgOpacity),
       buttonTextColor: hex(body.buttonTextColor, '#1a1a1a'),
       buttonBorderColor: hexOrEmpty(body.buttonBorderColor),
-      buttonBorderWidth: borderW(body.buttonBorderWidth),
+      buttonBorderWidth: floatW(body.buttonBorderWidth, 10),
       buttonRadius: text(body.buttonRadius, 10),
       buttonTextStrokeColor: hexOrEmpty(body.buttonTextStrokeColor),
-      buttonTextStrokeWidth: borderW(body.buttonTextStrokeWidth),
+      buttonTextStrokeWidth: floatW(body.buttonTextStrokeWidth, 3),
       link: /^\/(c|p)\/\d+$/.test(link) ? link : '',
     },
   } as const;
