@@ -441,6 +441,8 @@ function readBanner(body: Record<string, unknown>) {
   return {
     value: {
       imageKey,
+      overlayColor: hex(body.overlayColor, '#000000'),
+      overlayOpacity: opac(body.overlayOpacity),
       title: text(body.title, 80),
       titleColor: hex(body.titleColor, '#ffffff'),
       titleBg: hexOrEmpty(body.titleBg),

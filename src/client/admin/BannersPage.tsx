@@ -7,11 +7,11 @@ import { imageUrl } from '../lib/format';
 import { shrinkImage } from '../lib/image';
 import { confirmAction, haptic } from '../lib/telegram';
 import type { Banner } from '../types';
-import { titleSizeClass, subtitleSizeClass, buttonRadiusClass, titleStyle, subtitleStyle, buttonStyle } from '../shop/Home';
+import { titleSizeClass, subtitleSizeClass, buttonRadiusClass, titleStyle, subtitleStyle, buttonStyle, hexToRgba } from '../shop/Home';
 
 type Draft = Omit<Banner, 'id' | 'sort'> & { id?: number };
 const EMPTY: Draft = {
-  imageKey: '',
+  imageKey: '', overlayColor: '#000000', overlayOpacity: 0,
   title: '', titleColor: '#ffffff', titleBg: '', titleBgOpacity: 100, titleBorderColor: '', titleBorderWidth: 0, titleFontSize: '', titleTextStrokeColor: '', titleTextStrokeWidth: 0,
   subtitle: '', subtitleColor: '#ffffff', subtitleBg: '', subtitleBgOpacity: 100, subtitleBorderColor: '', subtitleBorderWidth: 0, subtitleFontSize: '', subtitleTextStrokeColor: '', subtitleTextStrokeWidth: 0,
   buttonText: '', buttonBgColor: '#ffffff', buttonBgOpacity: 100, buttonTextColor: '#1a1a1a', buttonBorderColor: '', buttonBorderWidth: 0, buttonRadius: '', buttonTextStrokeColor: '', buttonTextStrokeWidth: 0,
@@ -150,6 +150,9 @@ function BannerForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
         {form.imageKey ? (
           <>
             <img src={imageUrl(form.imageKey)} alt="" className="absolute inset-0 size-full object-cover object-left" />
+            {form.overlayColor && form.overlayOpacity > 0 && (
+              <div className="pointer-events-none absolute inset-0" style={{ backgroundColor: hexToRgba(form.overlayColor, form.overlayOpacity) }} />
+            )}
             {(form.title || form.subtitle || form.buttonText) && (
               <div className="pointer-events-none absolute inset-y-0 start-0 flex w-[55%] flex-col justify-center gap-2 ps-5 md:w-1/2 md:gap-3 md:ps-14">
                 {form.title && (
@@ -184,6 +187,16 @@ function BannerForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
         <input type="file" accept="image/*" className="sr-only" onChange={(e) => upload(e.target.files?.[0])} />
       </label>
       <p className="-mt-3 text-xs text-muted">يظهر النص على الجانب الأيمن، ويقص الجوال أطراف الصورة. ضع العنصر المهم في الثلث الأيسر واترك اليمين هادئاً.</p>
+
+      {/* Overlay على صورة البانر */}
+      <div className="rounded-xl border border-line bg-card p-3 space-y-2">
+        <p className="text-xs font-bold text-muted">🌑 غلاف الصورة (لتغميق الخلفية وإبراز النص)</p>
+        <div className="grid grid-cols-2 gap-2">
+          <ColorField label="لون الغلاف" value={form.overlayColor} onChange={(v) => set('overlayColor', v)} />
+          <OpacityField label="شفافية الغلاف" value={form.overlayOpacity} onChange={(v) => set('overlayOpacity', v)} />
+        </div>
+        <p className="text-[10px] text-muted">لتعطيله، اجعل الشفافية 0%.</p>
+      </div>
       {/* Title */}
       <div className="space-y-2 rounded-xl border border-line bg-card p-3">
         <p className="text-xs font-bold text-muted">✏️ العنوان</p>

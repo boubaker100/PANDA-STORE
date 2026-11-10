@@ -198,6 +198,9 @@ function BannerSlider({ banners }: { banners: Banner[] }) {
           const content = (
             <div className="relative aspect-[2/1] w-full sm:aspect-[5/2] md:aspect-[3/1]">
               <img src={imageUrl(banner.imageKey)} alt="" className="absolute inset-0 size-full object-cover object-left" loading={i ? 'lazy' : 'eager'} />
+              {banner.overlayColor && banner.overlayOpacity > 0 && (
+                <div className="pointer-events-none absolute inset-0" style={{ backgroundColor: hexToRgba(banner.overlayColor, banner.overlayOpacity) }} />
+              )}
               {(banner.title || banner.subtitle || banner.buttonText) && (
                 <div className="absolute inset-y-0 start-0 flex w-[55%] flex-col justify-center gap-2 ps-5 text-white md:w-1/2 md:gap-3 md:ps-14">
                   {banner.title && (

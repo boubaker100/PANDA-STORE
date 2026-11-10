@@ -48,6 +48,8 @@ export const categories = sqliteTable('categories', {
 export const banners = sqliteTable('banners', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   imageKey: text('image_key').notNull(),
+  overlayColor: text('overlay_color').notNull().default('#000000'),
+  overlayOpacity: real('overlay_opacity').notNull().default(0),
   title: text('title').notNull().default(''),
   titleColor: text('title_color').notNull().default('#ffffff'),
   titleBg: text('title_bg').notNull().default(''),

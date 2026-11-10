@@ -53,6 +53,8 @@ export interface Category {
 export interface Banner {
   id: number;
   imageKey: string;
+  overlayColor: string;
+  overlayOpacity: number;
   title: string;
   titleColor: string;
   titleBg: string;
