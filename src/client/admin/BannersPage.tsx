@@ -12,9 +12,9 @@ import { titleSizeClass, subtitleSizeClass, buttonRadiusClass, titleStyle, subti
 type Draft = Omit<Banner, 'id' | 'sort'> & { id?: number };
 const EMPTY: Draft = {
   imageKey: '',
-  title: '', titleColor: '#ffffff', titleBg: '', titleBgOpacity: 100, titleBorderColor: '', titleBorderWidth: 0, titleFontSize: '',
-  subtitle: '', subtitleColor: '#ffffff', subtitleBg: '', subtitleBgOpacity: 100, subtitleBorderColor: '', subtitleBorderWidth: 0, subtitleFontSize: '',
-  buttonText: '', buttonBgColor: '#ffffff', buttonBgOpacity: 100, buttonTextColor: '#1a1a1a', buttonBorderColor: '', buttonBorderWidth: 0, buttonRadius: '',
+  title: '', titleColor: '#ffffff', titleBg: '', titleBgOpacity: 100, titleBorderColor: '', titleBorderWidth: 0, titleFontSize: '', titleTextStrokeColor: '', titleTextStrokeWidth: 0,
+  subtitle: '', subtitleColor: '#ffffff', subtitleBg: '', subtitleBgOpacity: 100, subtitleBorderColor: '', subtitleBorderWidth: 0, subtitleFontSize: '', subtitleTextStrokeColor: '', subtitleTextStrokeWidth: 0,
+  buttonText: '', buttonBgColor: '#ffffff', buttonBgOpacity: 100, buttonTextColor: '#1a1a1a', buttonBorderColor: '', buttonBorderWidth: 0, buttonRadius: '', buttonTextStrokeColor: '', buttonTextStrokeWidth: 0,
   link: '',
 };
 
@@ -194,12 +194,14 @@ function BannerForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
             <span className="text-xs font-medium text-muted">نص</span>
           </label>
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-7">
           <ColorField label="خلفية" value={form.titleBg} onChange={(v) => set('titleBg', v)} />
           <OpacityField label="شفافية" value={form.titleBgOpacity} onChange={(v) => set('titleBgOpacity', v)} />
-          <ColorField label="بوردر" value={form.titleBorderColor} onChange={(v) => set('titleBorderColor', v)} />
-          <NumberField label="سماكة" value={form.titleBorderWidth} onChange={(v) => set('titleBorderWidth', v)} />
+          <ColorField label="بوردر المربع" value={form.titleBorderColor} onChange={(v) => set('titleBorderColor', v)} />
+          <NumberField label="سماكة المربع" value={form.titleBorderWidth} onChange={(v) => set('titleBorderWidth', v)} />
           <SizeField label="حجم" value={form.titleFontSize} onChange={(v) => set('titleFontSize', v)} />
+          <ColorField label="إطار الحرف" value={form.titleTextStrokeColor} onChange={(v) => set('titleTextStrokeColor', v)} />
+          <NumberField label="سماكة الحرف" value={form.titleTextStrokeWidth} onChange={(v) => set('titleTextStrokeWidth', v)} />
         </div>
       </div>
 
@@ -213,12 +215,14 @@ function BannerForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
             <span className="text-xs font-medium text-muted">نص</span>
           </label>
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-7">
           <ColorField label="خلفية" value={form.subtitleBg} onChange={(v) => set('subtitleBg', v)} />
           <OpacityField label="شفافية" value={form.subtitleBgOpacity} onChange={(v) => set('subtitleBgOpacity', v)} />
-          <ColorField label="بوردر" value={form.subtitleBorderColor} onChange={(v) => set('subtitleBorderColor', v)} />
-          <NumberField label="سماكة" value={form.subtitleBorderWidth} onChange={(v) => set('subtitleBorderWidth', v)} />
+          <ColorField label="بوردر المربع" value={form.subtitleBorderColor} onChange={(v) => set('subtitleBorderColor', v)} />
+          <NumberField label="سماكة المربع" value={form.subtitleBorderWidth} onChange={(v) => set('subtitleBorderWidth', v)} />
           <SizeField label="حجم" value={form.subtitleFontSize} onChange={(v) => set('subtitleFontSize', v)} />
+          <ColorField label="إطار الحرف" value={form.subtitleTextStrokeColor} onChange={(v) => set('subtitleTextStrokeColor', v)} />
+          <NumberField label="سماكة الحرف" value={form.subtitleTextStrokeWidth} onChange={(v) => set('subtitleTextStrokeWidth', v)} />
         </div>
       </div>
 
@@ -237,13 +241,15 @@ function BannerForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
             </optgroup>
           </select>
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-6">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-8">
           <ColorField label="خلفية" value={form.buttonBgColor} onChange={(v) => set('buttonBgColor', v)} />
           <OpacityField label="شفافية" value={form.buttonBgOpacity} onChange={(v) => set('buttonBgOpacity', v)} />
           <ColorField label="نص" value={form.buttonTextColor} onChange={(v) => set('buttonTextColor', v)} />
-          <ColorField label="بوردر" value={form.buttonBorderColor} onChange={(v) => set('buttonBorderColor', v)} />
-          <NumberField label="سماكة" value={form.buttonBorderWidth} onChange={(v) => set('buttonBorderWidth', v)} />
+          <ColorField label="بوردر المربع" value={form.buttonBorderColor} onChange={(v) => set('buttonBorderColor', v)} />
+          <NumberField label="سماكة المربع" value={form.buttonBorderWidth} onChange={(v) => set('buttonBorderWidth', v)} />
           <RadiusField label="زوايا" value={form.buttonRadius} onChange={(v) => set('buttonRadius', v)} />
+          <ColorField label="إطار الحرف" value={form.buttonTextStrokeColor} onChange={(v) => set('buttonTextStrokeColor', v)} />
+          <NumberField label="سماكة الحرف" value={form.buttonTextStrokeWidth} onChange={(v) => set('buttonTextStrokeWidth', v)} />
         </div>
       </div>
       {error && <Notice tone="error">{error}</Notice>}

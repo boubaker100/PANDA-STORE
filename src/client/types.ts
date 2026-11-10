@@ -60,6 +60,8 @@ export interface Banner {
   titleBorderColor: string;
   titleBorderWidth: number;
   titleFontSize: string;
+  titleTextStrokeColor: string;
+  titleTextStrokeWidth: number;
   subtitle: string;
   subtitleColor: string;
   subtitleBg: string;
@@ -67,6 +69,8 @@ export interface Banner {
   subtitleBorderColor: string;
   subtitleBorderWidth: number;
   subtitleFontSize: string;
+  subtitleTextStrokeColor: string;
+  subtitleTextStrokeWidth: number;
   buttonText: string;
   buttonBgColor: string;
   buttonBgOpacity: number;
@@ -74,6 +78,8 @@ export interface Banner {
   buttonBorderColor: string;
   buttonBorderWidth: number;
   buttonRadius: string;
+  buttonTextStrokeColor: string;
+  buttonTextStrokeWidth: number;
   link: string;
   sort: number;
 }
