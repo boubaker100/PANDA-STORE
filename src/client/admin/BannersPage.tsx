@@ -146,17 +146,12 @@ function BannerForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
   return (
     <form onSubmit={save} className="mx-auto max-w-2xl space-y-5">
       <h1 className="text-xl font-semibold">{form.id ? 'تعديل البنر' : 'بنر جديد'}</h1>
-
-      {/* Live Preview */}
-      {form.imageKey && (
-        <div className="overflow-hidden rounded-2xl border border-line bg-card shadow-sm">
-          <p className="border-b border-line bg-paper px-3 py-2 text-xs font-bold text-muted">
-            👁️ معاينة حية — تُحدَّث فوراً مع كل تغيير
-          </p>
-          <div className="relative aspect-[2/1] w-full sm:aspect-[5/2] md:aspect-[3/1]">
+      <label className="relative block aspect-[3/1] cursor-pointer overflow-hidden rounded-2xl border border-dashed border-line bg-card hover:border-brand">
+        {form.imageKey ? (
+          <>
             <img src={imageUrl(form.imageKey)} alt="" className="absolute inset-0 size-full object-cover object-left" />
             {(form.title || form.subtitle || form.buttonText) && (
-              <div className="absolute inset-y-0 start-0 flex w-[55%] flex-col justify-center gap-2 ps-5 md:w-1/2 md:gap-3 md:ps-14">
+              <div className="pointer-events-none absolute inset-y-0 start-0 flex w-[55%] flex-col justify-center gap-2 ps-5 md:w-1/2 md:gap-3 md:ps-14">
                 {form.title && (
                   <p className={`${titleSizeClass(form.titleFontSize)} font-bold leading-tight drop-shadow`} style={titleStyle(form)}>
                     {form.title}
@@ -174,12 +169,10 @@ function BannerForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
                 )}
               </div>
             )}
-          </div>
-        </div>
-      )}
-      <label className="relative block aspect-[3/1] cursor-pointer overflow-hidden rounded-2xl border border-dashed border-line bg-card hover:border-brand">
-        {form.imageKey ? (
-          <img src={imageUrl(form.imageKey)} alt="" className="size-full object-cover object-left" />
+            <span className="absolute end-2 top-2 rounded-md bg-black/60 px-2 py-1 text-[10px] font-semibold text-white">
+              👁️ معاينة حية · اضغط لتغيير الصورة
+            </span>
+          </>
         ) : (
           <span className="grid size-full place-items-center text-muted">
             <span className="flex flex-col items-center gap-2 text-sm">
