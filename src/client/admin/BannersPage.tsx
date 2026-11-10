@@ -144,7 +144,7 @@ function BannerForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
   }
 
   return (
-    <form onSubmit={save} className="mx-auto max-w-2xl space-y-5">
+    <form onSubmit={save} className="mx-auto max-w-4xl space-y-5">
       <h1 className="text-xl font-semibold">{form.id ? 'تعديل البنر' : 'بنر جديد'}</h1>
       <label className="relative block aspect-[3/1] cursor-pointer overflow-hidden rounded-2xl border border-dashed border-line bg-card hover:border-brand">
         {form.imageKey ? (
@@ -154,7 +154,7 @@ function BannerForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
               <div className="pointer-events-none absolute inset-0" style={{ backgroundColor: hexToRgba(form.overlayColor, form.overlayOpacity) }} />
             )}
             {(form.title || form.subtitle || form.buttonText) && (
-              <div className="pointer-events-none absolute inset-y-0 start-0 flex w-[55%] flex-col justify-center gap-2 ps-5 md:w-1/2 md:gap-3 md:ps-14">
+              <div className="pointer-events-none absolute inset-y-0 start-0 flex w-[55%] flex-col justify-center gap-2 ps-5 text-white md:w-1/2 md:gap-3 md:ps-14">
                 {form.title && (
                   <p className={`${titleSizeClass(form.titleFontSize)} font-bold leading-tight drop-shadow`} style={titleStyle(form)}>
                     {form.title}
