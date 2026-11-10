@@ -201,7 +201,7 @@ function BannerForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
           <NumberField label="سماكة المربع" value={form.titleBorderWidth} onChange={(v) => set('titleBorderWidth', v)} />
           <SizeField label="حجم" value={form.titleFontSize} onChange={(v) => set('titleFontSize', v)} />
           <ColorField label="إطار الحرف" value={form.titleTextStrokeColor} onChange={(v) => set('titleTextStrokeColor', v)} />
-          <NumberField label="سماكة الحرف" value={form.titleTextStrokeWidth} onChange={(v) => set('titleTextStrokeWidth', v)} />
+          <StrokeField label="سماكة الحرف" value={form.titleTextStrokeWidth} onChange={(v) => set('titleTextStrokeWidth', v)} />
         </div>
       </div>
 
@@ -222,7 +222,7 @@ function BannerForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
           <NumberField label="سماكة المربع" value={form.subtitleBorderWidth} onChange={(v) => set('subtitleBorderWidth', v)} />
           <SizeField label="حجم" value={form.subtitleFontSize} onChange={(v) => set('subtitleFontSize', v)} />
           <ColorField label="إطار الحرف" value={form.subtitleTextStrokeColor} onChange={(v) => set('subtitleTextStrokeColor', v)} />
-          <NumberField label="سماكة الحرف" value={form.subtitleTextStrokeWidth} onChange={(v) => set('subtitleTextStrokeWidth', v)} />
+          <StrokeField label="سماكة الحرف" value={form.subtitleTextStrokeWidth} onChange={(v) => set('subtitleTextStrokeWidth', v)} />
         </div>
       </div>
 
@@ -249,7 +249,7 @@ function BannerForm({ draft, onDone }: { draft: Draft; onDone: () => void }) {
           <NumberField label="سماكة المربع" value={form.buttonBorderWidth} onChange={(v) => set('buttonBorderWidth', v)} />
           <RadiusField label="زوايا" value={form.buttonRadius} onChange={(v) => set('buttonRadius', v)} />
           <ColorField label="إطار الحرف" value={form.buttonTextStrokeColor} onChange={(v) => set('buttonTextStrokeColor', v)} />
-          <NumberField label="سماكة الحرف" value={form.buttonTextStrokeWidth} onChange={(v) => set('buttonTextStrokeWidth', v)} />
+          <StrokeField label="سماكة الحرف" value={form.buttonTextStrokeWidth} onChange={(v) => set('buttonTextStrokeWidth', v)} />
         </div>
       </div>
       {error && <Notice tone="error">{error}</Notice>}
@@ -270,6 +270,23 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
     <label className="flex flex-col gap-1 text-[10px] text-muted">
       <span>{label}</span>
       <input type="color" className="h-8 w-full cursor-pointer rounded border border-line bg-card p-0.5" value={value || '#ffffff'} onChange={(e) => onChange(e.target.value)} />
+    </label>
+  );
+}
+
+function StrokeField({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+  return (
+    <label className="flex flex-col gap-1 text-[10px] text-muted">
+      <span>{label}</span>
+      <input
+        type="number"
+        className="field px-2 py-1 text-xs"
+        min={0}
+        max={3}
+        step={0.1}
+        value={(value / 10).toFixed(1)}
+        onChange={(e) => onChange(Math.round(Math.min(3, Math.max(0, Number(e.target.value) || 0)) * 10))}
+      />
     </label>
   );
 }
