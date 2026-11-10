@@ -64,7 +64,7 @@ export function Home() {
   );
 }
 
-function titleSizeClass(size: string): string {
+export function titleSizeClass(size: string): string {
   const map: Record<string, string> = {
     '': 'text-xl sm:text-3xl md:text-4xl',
     sm: 'text-lg sm:text-xl md:text-2xl',
@@ -76,7 +76,7 @@ function titleSizeClass(size: string): string {
   return map[size] ?? map[''];
 }
 
-function subtitleSizeClass(size: string): string {
+export function subtitleSizeClass(size: string): string {
   const map: Record<string, string> = {
     '': 'text-[13px] sm:text-base md:text-lg',
     sm: 'text-xs sm:text-sm md:text-base',
@@ -88,7 +88,7 @@ function subtitleSizeClass(size: string): string {
   return map[size] ?? map[''];
 }
 
-function buttonRadiusClass(radius: string): string {
+export function buttonRadiusClass(radius: string): string {
   const map: Record<string, string> = {
     '': 'rounded-lg',
     none: 'rounded-none',
@@ -100,7 +100,14 @@ function buttonRadiusClass(radius: string): string {
   return map[radius] ?? map[''];
 }
 
-function hexToRgba(hex: string, opacity: number): string {
+export type BannerStyleInput = Pick<
+  Banner,
+  | 'titleColor' | 'titleBg' | 'titleBgOpacity' | 'titleBorderColor' | 'titleBorderWidth'
+  | 'subtitleColor' | 'subtitleBg' | 'subtitleBgOpacity' | 'subtitleBorderColor' | 'subtitleBorderWidth'
+  | 'buttonBgColor' | 'buttonBgOpacity' | 'buttonTextColor' | 'buttonBorderColor' | 'buttonBorderWidth'
+>;
+
+export function hexToRgba(hex: string, opacity: number): string {
   if (!hex) return 'transparent';
   const h = hex.replace('#', '');
   if (h.length !== 6) return hex;
@@ -111,7 +118,7 @@ function hexToRgba(hex: string, opacity: number): string {
   return `rgba(${r},${g},${b},${a})`;
 }
 
-function titleStyle(b: Banner): CSSProperties {
+export function titleStyle(b: BannerStyleInput): CSSProperties {
   const s: CSSProperties = { color: b.titleColor || '#ffffff' };
   if (b.titleBg) s.backgroundColor = hexToRgba(b.titleBg, b.titleBgOpacity ?? 100);
   if (b.titleBorderWidth > 0) s.border = `${b.titleBorderWidth}px solid ${b.titleBorderColor || '#ffffff'}`;
@@ -123,7 +130,7 @@ function titleStyle(b: Banner): CSSProperties {
   return s;
 }
 
-function subtitleStyle(b: Banner): CSSProperties {
+export function subtitleStyle(b: BannerStyleInput): CSSProperties {
   const s: CSSProperties = { color: b.subtitleColor || '#ffffff' };
   if (b.subtitleBg) s.backgroundColor = hexToRgba(b.subtitleBg, b.subtitleBgOpacity ?? 100);
   if (b.subtitleBorderWidth > 0) s.border = `${b.subtitleBorderWidth}px solid ${b.subtitleBorderColor || '#ffffff'}`;
@@ -135,7 +142,7 @@ function subtitleStyle(b: Banner): CSSProperties {
   return s;
 }
 
-function buttonStyle(b: Banner): CSSProperties {
+export function buttonStyle(b: BannerStyleInput): CSSProperties {
   const s: CSSProperties = {
     backgroundColor: hexToRgba(b.buttonBgColor || '#ffffff', b.buttonBgOpacity ?? 100),
     color: b.buttonTextColor || '#1a1a1a',
